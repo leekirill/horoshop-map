@@ -1,47 +1,59 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import { ref, watch, onMounted } from 'vue'
+import { GoogleMap, Marker } from 'vue3-google-map'
+import getData from './getData'
+
+const API_KEY = 'AIzaSyAYiSUVdUYIiTXsSHQOh2saSqQzvDvjbqI'
+
+const data = ref([])
+const option = ref(null)
+const location = ref({})
+
+// watch(count, (count, prevCount) => {
+//   /* ... */
+// })
+watch(option, () => {
+  data.value.filter((city) => {
+    if (city.name === option.value) {
+      location.value = city.location
+
+      // надо переименовать ключи на lag lng
+      console.log(location.value)
+    }
+  })
+})
+
+onMounted(() => {
+  getData().then((cities) => (data.value = cities))
+})
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+  <section class="main">
+    <aside class="sidebar">
+      <form class="form">
+        <select v-model="option" class="custom-select">
+          <option class="radios" v-for="(city, i) of data" :key="i">
+            <input type="radio" name="item" id="default" checked />
+            {{ city.name }}
+          </option>
+          <ul class="citiesList"></ul>
+        </select>
+        <input class="search" placeholder="search" />
+      </form>
+      <ul class="placesList"></ul>
+    </aside>
+    <div id="map">
+      <GoogleMap
+        :api-key="API_KEY"
+        style="width: 100%; height: 500px"
+        :center="{ lat: 48.4593, lng: 35.03865 }"
+        :zoom="15"
+      >
+        <Marker :options="{ position: center }" />
+      </GoogleMap>
     </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  </section>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>
+<style lang="scss" scoped></style>
