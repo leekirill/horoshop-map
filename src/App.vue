@@ -1,59 +1,69 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { GoogleMap, Marker } from 'vue3-google-map'
-import getData from './getData'
+import { getCities, getPlaces } from './dataAPI.js'
+import API_KEY from './API_KEY'
 
-const API_KEY = 'AIzaSyAYiSUVdUYIiTXsSHQOh2saSqQzvDvjbqI'
-
-const data = ref([])
-const option = ref(null)
+const cities = ref([])
+const selectedCity = ref('')
 const location = ref({})
+const markerOptions = { position: location.value }
 
-// watch(count, (count, prevCount) => {
-//   /* ... */
-// })
-watch(option, () => {
-  data.value.filter((city) => {
-    if (city.name === option.value) {
-      location.value = city.location
-
-      // надо переименовать ключи на lag lng
-      console.log(location.value)
+watch(selectedCity, () => {
+  cities.value.filter((city) => {
+    if (city.name === selectedCity.value) {
+      location.value = {
+        lat: Object.values(city.location)[1],
+        lng: Object.values(city.location)[2]
+      }
     }
   })
+
+  getPlaces(location.value.lat, location.value.lng)
+
+  // getLocation().then(console.log)
 })
 
+// onUpdated(() => {
+//   console.log(location)
+// })
+
 onMounted(() => {
-  getData().then((cities) => (data.value = cities))
+  getCities().then((data) => {
+    cities.value = data
+    selectedCity.value = data[0].name
+    location.value = { lat: data[0].location.latitude, lng: data[0].location.longitude }
+  })
+
+  getPlaces(location.value.lat, location.value.lng)
 })
 </script>
 
 <template>
-  <section class="main">
+  <div class="wrapper">
     <aside class="sidebar">
-      <form class="form">
-        <select v-model="option" class="custom-select">
-          <option class="radios" v-for="(city, i) of data" :key="i">
-            <input type="radio" name="item" id="default" checked />
+      <form class="sidebar__form">
+        <select v-model="selectedCity" class="sidebar__select">
+          <option class="sidebar__option" v-for="(city, i) in cities" :value="city.name" :key="i">
             {{ city.name }}
           </option>
-          <ul class="citiesList"></ul>
+          <ul class="sidebar__cities-list"></ul>
         </select>
-        <input class="search" placeholder="search" />
+        <input class="sidebar__search" placeholder="search" />
       </form>
-      <ul class="placesList"></ul>
+      <ul class="sidebar__places-list"></ul>
     </aside>
-    <div id="map">
+    <div class="map">
       <GoogleMap
         :api-key="API_KEY"
         style="width: 100%; height: 500px"
-        :center="{ lat: 48.4593, lng: 35.03865 }"
+        :center="location"
         :zoom="15"
       >
-        <Marker :options="{ position: center }" />
+        <Marker :options="markerOptions" />
       </GoogleMap>
     </div>
-  </section>
+  </div>
 </template>
 
 <style lang="scss" scoped></style>
