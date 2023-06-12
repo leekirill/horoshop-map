@@ -68,7 +68,6 @@ onMounted(() => {
     <aside class="sidebar">
       <div class="backdrop" v-show="isOpen"></div>
       <form class="sidebar__form">
-        {{ isOpen }}
         <div class="sidebar__select" @click="handleSelect">
           <div class="sidebar__select sidebar__select--selected-item">
             {{ selectedCity }}
@@ -77,9 +76,9 @@ onMounted(() => {
           <Transition>
             <ul class="sidebar__select-list" v-show="isOpen">
               <li
+                class="sidebar__select-item"
                 v-for="(city, i) in cities"
                 @click.stop="handleSelect"
-                :value="city.name"
                 :key="i"
               >
                 {{ city.name }}
@@ -164,11 +163,12 @@ li {
     border-bottom: 1px solid #e6e6e6;
   }
   &__select {
-    background: #f2f2f2;
+    position: relative;
     padding: 10px 14px;
     border-radius: 4px;
     border: none;
     z-index: 1;
+    background: #f2f2f2;
 
     &--selected-item {
       display: flex;
@@ -179,9 +179,24 @@ li {
 
   &__select-list {
     position: absolute;
+    width: 100%;
+    height: 300px;
+    overflow-y: scroll;
     background: #fff;
+    top: 40px;
+    left: 0;
+    margin: 0px 0px;
+    border-radius: 0px 0px 4px 4px;
   }
 
+  &__select-item {
+    padding: 14px;
+    cursor: pointer;
+    transition: 250ms;
+    &:hover {
+      background: #f2f2f2;
+    }
+  }
   &__places-list {
     margin: 0;
   }
