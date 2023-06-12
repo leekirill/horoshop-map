@@ -12,9 +12,9 @@ const getCities = async () => {
       'X-Parse-REST-API-Key': 'WmCXOBwY4neakmZBGU0EiXSg5AMGpwiMo59ufoyM' // This is your app's REST API key
     }
   }
-
   try {
     const { data } = await axios.get(URL, config)
+    console.log(data.results)
     return data.results
   } catch (error) {
     console.log(error.message)

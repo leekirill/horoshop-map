@@ -13,6 +13,7 @@ const searchValue = ref('')
 const markerOptions = { position: location.value }
 const isLoading = ref(false)
 const isOpen = ref(false)
+const isRendered = ref(false)
 
 const filteredList = computed(() => {
   return nearbyPlaces.value?.filter((n) =>
@@ -60,13 +61,17 @@ onMounted(() => {
     location.value = { lat: data[0].location.latitude, lng: data[0].location.longitude }
     isLoading.value = !isLoading.value
   })
+
+  isRendered.value = true
 })
 </script>
 
 <template>
-  <div class="wrapper">
+  <div class="wrapper" v-if="isRendered">
     <aside class="sidebar">
-      <div class="backdrop" v-show="isOpen"></div>
+      <Transition>
+        <div class="backdrop" v-show="isOpen"></div>
+      </Transition>
       <form class="sidebar__form">
         <div class="sidebar__select" @click="handleSelect">
           <div class="sidebar__select sidebar__select--selected-item">
@@ -119,10 +124,6 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
-* {
-  font-family: 'Roboto', sans-serif;
-  font-style: normal;
-}
 ul {
   padding: 0;
 }
@@ -168,13 +169,19 @@ li {
     border-radius: 4px;
     border: none;
     z-index: 1;
+    cursor: pointer;
     background: #f2f2f2;
+    transition: 250ms;
 
-    &--selected-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 0;
+    &:hover {
+      background: #f5f5f5;
     }
+  }
+  &__select--selected-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0;
+    background: none;
   }
 
   &__select-list {
@@ -240,7 +247,7 @@ li {
 
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 250ms ease;
 }
 
 .v-enter-from,
