@@ -17,7 +17,7 @@ const getCities = async () => {
     const { data } = await axios.get(URL, config)
     return data.results
   } catch (error) {
-    alert(error.message)
+    console.log(error.message)
   }
 }
 
@@ -29,7 +29,7 @@ const getPlaces = async (lag, lng) => {
     const { data } = await axios.get(URL)
     return data.results
   } catch (error) {
-    alert(error.message)
+    console.log(error.message)
   }
 }
 

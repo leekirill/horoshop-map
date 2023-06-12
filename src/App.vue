@@ -12,13 +12,13 @@ const nearbyPlaces = ref([])
 const searchValue = ref('')
 const markerOptions = { position: location.value }
 const isLoading = ref(false)
+const isOpen = ref(false)
 
 const filteredList = computed(() => {
-  return nearbyPlaces.value.filter((n) =>
+  return nearbyPlaces.value?.filter((n) =>
     n.name.toLowerCase().includes(searchValue.value.toLowerCase())
   )
 })
-
 const getLocation = () => {
   cities.value.filter((city) => {
     if (city.name === selectedCity.value) {
@@ -41,6 +41,11 @@ const setPlaceLocation = (i) => {
   location.value = nearbyPlaces.value[i].geometry.location
 }
 
+const handleSelect = (e) => {
+  isOpen.value = !isOpen.value
+  selectedCity.value = e.target.innerText
+}
+
 watch(selectedCity, () => {
   getLocation()
   getNearbyPlaces(location.value.lat, location.value.lng)
@@ -59,57 +64,66 @@ onMounted(() => {
 </script>
 
 <template>
-  <div style="position: relative">
-    <!-- <app-loader class="loader" v-if="isLoading" /> -->
-    <div class="wrapper">
-      <aside class="sidebar">
-        <form class="sidebar__form">
-          <select v-model="selectedCity" class="sidebar__select">
-            <option class="sidebar__option" v-for="(city, i) in cities" :value="city.name" :key="i">
-              {{ city.name }}
-            </option>
-            <ul class="sidebar__cities-list">
-              <li v-for="(city, i) in cities" :key="i">{{ city.name }}</li>
-            </ul>
-          </select>
-          <div class="sidebar__search">
-            <img class="sidebar__search-icon" src="./assets/search-icon.svg" alt="search-icon" />
-            <input class="sidebar__input" v-model="searchValue" placeholder="поиск" />
+  <div class="wrapper">
+    <aside class="sidebar">
+      <div class="backdrop" v-show="isOpen"></div>
+      <form class="sidebar__form">
+        {{ isOpen }}
+        <div class="sidebar__select" @click="handleSelect">
+          <div class="sidebar__select sidebar__select--selected-item">
+            {{ selectedCity }}
+            <img src="./assets/arrow-icon.svg" alt="arrow-icon" />
           </div>
-        </form>
-        <ul class="sidebar__places-list">
-          <app-loader class="loader" v-if="isLoading" />
-          <li
-            class="sidebar__places-item"
-            v-else
-            v-for="(n, i) in filteredList"
-            :key="i"
-            @click="setPlaceLocation(i)"
-          >
-            <h3>{{ n.name }}</h3>
-            <p>{{ n.vicinity }}</p>
-          </li>
-        </ul>
-      </aside>
-      <div class="map">
-        <GoogleMap
-          :api-key="API_KEY"
-          style="width: 100%; height: 680px"
-          :center="location"
-          :zoom="15"
+          <Transition>
+            <ul class="sidebar__select-list" v-show="isOpen">
+              <li
+                v-for="(city, i) in cities"
+                @click.stop="handleSelect"
+                :value="city.name"
+                :key="i"
+              >
+                {{ city.name }}
+              </li>
+            </ul>
+          </Transition>
+        </div>
+        <div class="sidebar__search">
+          <img class="sidebar__search-icon" src="./assets/search-icon.svg" alt="search-icon" />
+          <input class="sidebar__input" v-model="searchValue" placeholder="Search" />
+        </div>
+      </form>
+      <ul class="sidebar__places-list">
+        <app-loader class="loader" v-if="isLoading" />
+        <li
+          class="sidebar__places-item"
+          v-else
+          v-for="(n, i) in filteredList"
+          :key="i"
+          @click="setPlaceLocation(i)"
         >
-          <Marker :options="markerOptions" />
-        </GoogleMap>
-      </div>
+          <h3>{{ n.name }}</h3>
+          <p>{{ n.vicinity }}</p>
+        </li>
+      </ul>
+    </aside>
+    <div class="map">
+      <GoogleMap
+        :api-key="API_KEY"
+        style="width: 100%; height: 680px"
+        :center="location"
+        :zoom="15"
+      >
+        <Marker :options="markerOptions" />
+      </GoogleMap>
     </div>
   </div>
 </template>
 
 <style lang="scss">
-// * {
-//   font-family: 'Roboto';
-//   font-style: normal;
-// }
+* {
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+}
 ul {
   padding: 0;
 }
@@ -128,6 +142,14 @@ li {
   border: 1px solid #e5e5e5;
   border-radius: 6px;
 }
+.backdrop {
+  background: black;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 1;
+  opacity: 60%;
+}
 .sidebar {
   position: relative;
   overflow-y: scroll;
@@ -135,8 +157,8 @@ li {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    position: sticky;
-    top: 0;
+    // position: sticky;
+    // top: 0;
     background: #fff;
     padding: 20px 20px 0px 20px;
     border-bottom: 1px solid #e6e6e6;
@@ -146,7 +168,20 @@ li {
     padding: 10px 14px;
     border-radius: 4px;
     border: none;
+    z-index: 1;
+
+    &--selected-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0;
+    }
   }
+
+  &__select-list {
+    position: absolute;
+    background: #fff;
+  }
+
   &__places-list {
     margin: 0;
   }
@@ -186,5 +221,15 @@ li {
       outline: none;
     }
   }
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>
