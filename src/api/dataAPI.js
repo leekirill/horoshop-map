@@ -24,7 +24,7 @@ const getCities = async () => {
 // получаем массив близжайших мест
 
 const getPlaces = async (lag, lng) => {
-  const URL = `https://thingproxy.freeboard.io/fetch/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lag},${lng}&radius=1500&key=${API_KEY}`
+  const URL = `https://corsproxy.io/?https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lag},${lng}&radius=1500&key=${API_KEY}`
   try {
     const { data } = await axios.get(URL)
     return data.results

@@ -20,6 +20,14 @@ const filteredList = computed(() => {
     n.name.toLowerCase().includes(searchValue.value.toLowerCase())
   )
 })
+
+const arrowClass = computed(() => (isOpen.value ? 'arrow-icon arrow-icon--active' : 'arrow-icon'))
+const searchClass = computed(() =>
+  searchValue.value.length > 0
+    ? 'sidebar__search-icon sidebar__search-icon--active'
+    : 'sidebar__search-icon'
+)
+
 const getLocation = () => {
   cities.value.filter((city) => {
     if (city.name === selectedCity.value) {
@@ -31,11 +39,11 @@ const getLocation = () => {
   })
 }
 const getNearbyPlaces = (lat, lng) => {
-  isLoading.value = true
+  isLoading.value = !isLoading.value
 
   getPlaces(lat, lng).then((data) => {
     nearbyPlaces.value = data
-    isLoading.value = false
+    isLoading.value = !isLoading.value
   })
 }
 const setPlaceLocation = (i) => {
@@ -76,7 +84,7 @@ onMounted(() => {
         <div class="sidebar__select" @click="handleSelect">
           <div class="sidebar__select sidebar__select--selected-item">
             {{ selectedCity }}
-            <img src="./assets/arrow-icon.svg" alt="arrow-icon" />
+            <img :class="arrowClass" src="./assets/arrow-icon.svg" alt="arrow-icon" />
           </div>
           <Transition>
             <ul class="sidebar__select-list" v-show="isOpen">
@@ -92,7 +100,7 @@ onMounted(() => {
           </Transition>
         </div>
         <div class="sidebar__search">
-          <img class="sidebar__search-icon" src="./assets/search-icon.svg" alt="search-icon" />
+          <img :class="searchClass" src="./assets/search-icon.svg" alt="search-icon" />
           <input class="sidebar__input" v-model="searchValue" placeholder="Search" />
         </div>
       </form>
@@ -232,6 +240,9 @@ li {
       width: 16px;
       height: 16px;
     }
+    &-icon--active {
+      background: red;
+    }
   }
   &__input {
     width: 100%;
@@ -242,6 +253,13 @@ li {
     &:focus {
       outline: none;
     }
+  }
+}
+
+.arrow-icon {
+  transition: 250ms;
+  &--active {
+    transform: rotate(180deg);
   }
 }
 
