@@ -119,7 +119,7 @@ onMounted(() => {
             <p>{{ n.rating }}</p>
             <div v-if="n.rating">
               <span
-                v-for="(r, index) in ratingStarts"
+                v-for="(_, index) in ratingStarts"
                 :key="index"
                 :class="index + 1 < Math.ceil(n.rating) ? 'star' : 'star empty'"
                 :id="index"
