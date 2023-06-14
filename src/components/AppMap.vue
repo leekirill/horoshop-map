@@ -7,8 +7,17 @@ const props = defineProps({ location: Object })
 </script>
 
 <template>
-  <GoogleMap :api-key="API_KEY" style="width: 100%; height: 680px" :center="location" :zoom="15">
+  <GoogleMap :api-key="API_KEY" class="map" :center="location" :zoom="15">
     <Marker :options="{ position: props.location }" />
   </GoogleMap>
 </template>
-<style></style>
+
+<style lang="scss" scoped>
+.map {
+  width: 100%;
+  height: 680px;
+  @media (max-width: 768px) {
+    height: 340px;
+  }
+}
+</style>

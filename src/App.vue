@@ -106,19 +106,26 @@ li {
   list-style: none;
   cursor: pointer;
 }
+#app {
+  position: relative;
+  padding: 10px 30px;
+}
 .wrapper {
   max-width: 1200px;
   width: 100%;
   height: 680px;
   margin: auto;
 
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(0%, 10%);
 
   display: grid;
   grid-template-columns: 30% 70%;
+
+  @media (max-width: 768px) {
+    grid-template-rows: 50% 50%;
+    grid-template-columns: none;
+  }
+
   overflow: hidden;
 
   border-radius: 10px;
@@ -175,6 +182,9 @@ li {
     left: 0;
     margin: 0px 0px;
     border-radius: 0px 0px 4px 4px;
+    @media (max-width: 768px) {
+      height: 260px;
+    }
   }
 
   &__select-item {
@@ -189,6 +199,9 @@ li {
     margin: 0;
     overflow-y: scroll;
     height: 558px;
+    @media (max-width: 768px) {
+      height: 218px;
+    }
   }
   &__places-item {
     padding: 18px 20px;
