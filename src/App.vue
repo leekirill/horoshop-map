@@ -2,14 +2,14 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { getCities, getPlaces } from './api/dataAPI.js'
 import AppMap from './components/AppMap.vue'
-import AppLoader from './components/AppLoader.vue'
+import AppPlacesList from './components/AppPlacesList.vue'
+import AppForm from './components/AppForm.vue'
 
 const cities = ref([])
-const selectedCity = ref('')
+const selectedCity = ref('Choose your city')
 const location = ref({})
 const nearbyPlaces = ref([])
 const searchValue = ref('')
-const ratingStarts = ref(new Array(5).fill())
 const isLoading = ref(false)
 const isOpen = ref(false)
 
@@ -19,7 +19,7 @@ const filteredList = computed(() => {
   )
 })
 
-const arrowClass = computed(() => (isOpen.value ? 'arrow-icon arrow-icon--active' : 'arrow-icon'))
+const getSearchValue = (valueFromEmit) => (searchValue.value = valueFromEmit)
 
 const getLocationFromCity = () => {
   cities.value.filter((city) => {
@@ -39,18 +39,13 @@ const getNearbyPlaces = (lat, lng) => {
     isLoading.value = !isLoading.value
   })
 }
-const setPlaceLocationToCenter = (i) => {
-  location.value = nearbyPlaces.value[i].geometry.location
-}
-
-const selectIsOpen = () => {
-  isOpen.value = !isOpen.value
-}
+const setPlaceLocationToCenter = (i) => (location.value = nearbyPlaces.value[i].geometry.location)
 
 const selectCity = (e) => {
   selectedCity.value = e.target.innerText
   isOpen.value = !isOpen.value
 }
+const selectIsOpen = () => (isOpen.value = !isOpen.value)
 
 watch(selectedCity, () => {
   getLocationFromCity()
@@ -62,7 +57,7 @@ onMounted(() => {
 
   getCities().then((data) => {
     cities.value = data
-    selectedCity.value = data[0].name
+    // selectedCity.value = data[0].name
     location.value = { lat: data[0].location.latitude, lng: data[0].location.longitude }
     isLoading.value = !isLoading.value
   })
@@ -75,60 +70,20 @@ onMounted(() => {
       <Transition>
         <div class="backdrop" v-show="isOpen"></div>
       </Transition>
-      <form class="sidebar__form" :style="{ position: isOpen ? 'relative' : 'sticky' }">
-        <div class="sidebar__select" @click="selectIsOpen">
-          <div class="sidebar__select sidebar__select--selected-item">
-            <span>{{ selectedCity }}</span>
-            <img :class="arrowClass" src="./assets/arrow-icon.svg" alt="arrow-icon" />
-          </div>
-          <Transition>
-            <ul class="sidebar__select-list" v-show="isOpen">
-              <li
-                class="sidebar__select-item"
-                v-for="(city, i) in cities"
-                @click.stop="selectCity"
-                :key="i"
-              >
-                {{ city.name }}
-              </li>
-            </ul>
-          </Transition>
-        </div>
-        <div class="sidebar__search">
-          <img
-            class="sidebar__search-icon"
-            :style="{ opacity: searchValue ? 1 : 0.3 }"
-            src="./assets/search-icon.svg"
-            alt="search-icon"
-          />
-          <input class="sidebar__input" v-model="searchValue" placeholder="Search" />
-        </div>
-      </form>
-      <ul class="sidebar__places-list">
-        <app-loader class="loader" v-if="isLoading" />
-        <li
-          class="sidebar__places-item"
-          v-else
-          v-for="(n, i) in filteredList"
-          :key="i"
-          @click="setPlaceLocationToCenter(i)"
-        >
-          <h3>{{ n.name }}</h3>
-          <p>{{ n.vicinity }}</p>
-          <div class="rating">
-            <p>{{ n.rating }}</p>
-            <div v-if="n.rating">
-              <span
-                v-for="(_, index) in ratingStarts"
-                :key="index"
-                :class="index + 1 < Math.ceil(n.rating) ? 'star' : 'star empty'"
-                :id="index"
-              ></span>
-            </div>
-            <span v-else>No rating</span>
-          </div>
-        </li>
-      </ul>
+      <app-form
+        :cities="cities"
+        :searchValue="searchValue"
+        :isOpen="isOpen"
+        @selectCity="selectCity"
+        @selectIsOpen="selectIsOpen"
+        @searchValue="getSearchValue"
+        >{{ selectedCity }}</app-form
+      >
+      <app-places-list
+        :arr="filteredList"
+        :isLoading="isLoading"
+        @handleItem="setPlaceLocationToCenter"
+      ></app-places-list>
     </aside>
     <div class="map">
       <app-map :location="location" />
@@ -153,8 +108,14 @@ li {
 }
 .wrapper {
   max-width: 1200px;
+  width: 100%;
   height: 680px;
-  margin: 100px auto;
+  margin: auto;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 
   display: grid;
   grid-template-columns: 30% 70%;
@@ -174,14 +135,11 @@ li {
 }
 .sidebar {
   position: relative;
-  overflow-y: scroll;
   background: #fff;
   &__form {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    position: sticky;
-    top: 0;
     background: #fff;
     padding: 20px 20px 0px 20px;
     border-bottom: 1px solid #e6e6e6;
@@ -229,6 +187,8 @@ li {
   }
   &__places-list {
     margin: 0;
+    overflow-y: scroll;
+    height: 558px;
   }
   &__places-item {
     padding: 18px 20px;
@@ -280,29 +240,6 @@ li {
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 100px;
   border: 2px solid #fff;
-}
-
-.rating {
-  unicode-bidi: bidi-override;
-  direction: rtl;
-  margin-top: 16px;
-  display: flex;
-  flex-flow: row-reverse;
-  p {
-    margin-right: 8px;
-  }
-}
-
-.star {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  background-image: url('./assets/filled-star.svg');
-  background-size: cover;
-}
-
-.star.empty {
-  background-image: url('./assets/empty-star.svg');
 }
 
 .arrow-icon {
