@@ -14,7 +14,6 @@ const getCities = async () => {
   }
   try {
     const { data } = await axios.get(URL, config)
-    console.log(data.results)
     return data.results
   } catch (error) {
     console.log(error.message)
@@ -27,7 +26,7 @@ const getPlaces = async (lag, lng) => {
   const URL = `https://corsproxy.io/?https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lag},${lng}&radius=1500&key=${API_KEY}`
   try {
     const { data } = await axios.get(URL)
-    return data.results
+    return data.results.slice(1)
   } catch (error) {
     console.log(error.message)
   }

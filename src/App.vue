@@ -1,8 +1,7 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
-import { GoogleMap, Marker } from 'vue3-google-map'
 import { getCities, getPlaces } from './api/dataAPI.js'
-import API_KEY from './api/API_KEY'
+import AppMap from './components/AppMap.vue'
 import AppLoader from './components/AppLoader.vue'
 
 const cities = ref([])
@@ -10,10 +9,8 @@ const selectedCity = ref('')
 const location = ref({})
 const nearbyPlaces = ref([])
 const searchValue = ref('')
-const markerOptions = { position: location.value }
 const isLoading = ref(false)
 const isOpen = ref(false)
-const isRendered = ref(false)
 
 const filteredList = computed(() => {
   return nearbyPlaces.value?.filter((n) =>
@@ -22,13 +19,13 @@ const filteredList = computed(() => {
 })
 
 const arrowClass = computed(() => (isOpen.value ? 'arrow-icon arrow-icon--active' : 'arrow-icon'))
-const searchClass = computed(() =>
-  searchValue.value.length > 0
-    ? 'sidebar__search-icon sidebar__search-icon--active'
-    : 'sidebar__search-icon'
-)
+// const searchClass = computed(() =>
+//   searchValue.value.length === 0
+//     ? 'sidebar__search-icon sidebar__search-icon--active'
+//     : 'sidebar__search-icon'
+// )
 
-const getLocation = () => {
+const getLocationFromCity = () => {
   cities.value.filter((city) => {
     if (city.name === selectedCity.value) {
       location.value = {
@@ -46,17 +43,21 @@ const getNearbyPlaces = (lat, lng) => {
     isLoading.value = !isLoading.value
   })
 }
-const setPlaceLocation = (i) => {
+const setPlaceLocationToCenter = (i) => {
   location.value = nearbyPlaces.value[i].geometry.location
 }
 
-const handleSelect = (e) => {
+const selectIsOpen = () => {
   isOpen.value = !isOpen.value
+}
+
+const selectCity = (e) => {
   selectedCity.value = e.target.innerText
+  isOpen.value = !isOpen.value
 }
 
 watch(selectedCity, () => {
-  getLocation()
+  getLocationFromCity()
   getNearbyPlaces(location.value.lat, location.value.lng)
 })
 
@@ -69,21 +70,19 @@ onMounted(() => {
     location.value = { lat: data[0].location.latitude, lng: data[0].location.longitude }
     isLoading.value = !isLoading.value
   })
-
-  isRendered.value = true
 })
 </script>
 
 <template>
-  <div class="wrapper" v-if="isRendered">
+  <div class="wrapper">
     <aside class="sidebar">
       <Transition>
         <div class="backdrop" v-show="isOpen"></div>
       </Transition>
       <form class="sidebar__form">
-        <div class="sidebar__select" @click="handleSelect">
+        <div class="sidebar__select" @click="selectIsOpen">
           <div class="sidebar__select sidebar__select--selected-item">
-            {{ selectedCity }}
+            <span>{{ selectedCity }}</span>
             <img :class="arrowClass" src="./assets/arrow-icon.svg" alt="arrow-icon" />
           </div>
           <Transition>
@@ -91,7 +90,7 @@ onMounted(() => {
               <li
                 class="sidebar__select-item"
                 v-for="(city, i) in cities"
-                @click.stop="handleSelect"
+                @click.stop="selectCity"
                 :key="i"
               >
                 {{ city.name }}
@@ -100,7 +99,12 @@ onMounted(() => {
           </Transition>
         </div>
         <div class="sidebar__search">
-          <img :class="searchClass" src="./assets/search-icon.svg" alt="search-icon" />
+          <img
+            class="sidebar__search-icon"
+            :style="{ opacity: searchValue ? 1 : 0.3 }"
+            src="./assets/search-icon.svg"
+            alt="search-icon"
+          />
           <input class="sidebar__input" v-model="searchValue" placeholder="Search" />
         </div>
       </form>
@@ -111,7 +115,7 @@ onMounted(() => {
           v-else
           v-for="(n, i) in filteredList"
           :key="i"
-          @click="setPlaceLocation(i)"
+          @click="setPlaceLocationToCenter(i)"
         >
           <h3>{{ n.name }}</h3>
           <p>{{ n.vicinity }}</p>
@@ -119,14 +123,7 @@ onMounted(() => {
       </ul>
     </aside>
     <div class="map">
-      <GoogleMap
-        :api-key="API_KEY"
-        style="width: 100%; height: 680px"
-        :center="location"
-        :zoom="15"
-      >
-        <Marker :options="markerOptions" />
-      </GoogleMap>
+      <app-map :location="location" />
     </div>
   </div>
 </template>
@@ -239,9 +236,8 @@ li {
     &-icon {
       width: 16px;
       height: 16px;
-    }
-    &-icon--active {
-      background: red;
+      opacity: 0.3;
+      transition: 250ms;
     }
   }
   &__input {
@@ -249,7 +245,6 @@ li {
     height: 38px;
     padding: 0 20px 0 8px;
     border: 0px solid #fff;
-
     &:focus {
       outline: none;
     }
