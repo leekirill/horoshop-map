@@ -21,14 +21,6 @@ const filteredList = computed(() => {
 
 const arrowClass = computed(() => (isOpen.value ? 'arrow-icon arrow-icon--active' : 'arrow-icon'))
 
-const createRating = () => {
-  return nearbyPlaces.value.map((r, i) => {
-    const rating = Math.floor(r.rating)
-    return i < rating ? 'star empty' : 'star'
-    // return i < r.rating ? 'empty' : 'star'
-  })
-}
-
 const getLocationFromCity = () => {
   cities.value.filter((city) => {
     if (city.name === selectedCity.value) {
@@ -130,6 +122,7 @@ onMounted(() => {
                 v-for="(r, index) in ratingStarts"
                 :key="index"
                 :class="index + 1 < Math.ceil(n.rating) ? 'star' : 'star empty'"
+                :id="index"
               ></span>
             </div>
             <span v-else>No rating</span>
