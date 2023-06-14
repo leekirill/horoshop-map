@@ -137,6 +137,13 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
+body {
+  background-image: radial-gradient(
+    circle farthest-corner at 10% 20%,
+    rgba(216, 241, 230, 0.46) 0.1%,
+    rgba(233, 226, 226, 0.28) 90.1%
+  );
+}
 ul {
   padding: 0;
 }
@@ -147,13 +154,15 @@ li {
 .wrapper {
   max-width: 1200px;
   height: 680px;
-  margin: auto;
+  margin: 100px auto;
 
   display: grid;
   grid-template-columns: 30% 70%;
+  overflow: hidden;
 
-  border: 1px solid #e5e5e5;
-  border-radius: 6px;
+  border-radius: 10px;
+
+  box-shadow: 0px 40px 30px rgba(0, 0, 0, 0.1);
 }
 .backdrop {
   background: black;
@@ -166,6 +175,7 @@ li {
 .sidebar {
   position: relative;
   overflow-y: scroll;
+  background: #fff;
   &__form {
     display: flex;
     flex-direction: column;
