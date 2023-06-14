@@ -9,6 +9,7 @@ const selectedCity = ref('')
 const location = ref({})
 const nearbyPlaces = ref([])
 const searchValue = ref('')
+const ratingStarts = ref(new Array(5).fill())
 const isLoading = ref(false)
 const isOpen = ref(false)
 
@@ -19,11 +20,14 @@ const filteredList = computed(() => {
 })
 
 const arrowClass = computed(() => (isOpen.value ? 'arrow-icon arrow-icon--active' : 'arrow-icon'))
-// const searchClass = computed(() =>
-//   searchValue.value.length === 0
-//     ? 'sidebar__search-icon sidebar__search-icon--active'
-//     : 'sidebar__search-icon'
-// )
+
+const createRating = () => {
+  return nearbyPlaces.value.map((r, i) => {
+    const rating = Math.floor(r.rating)
+    return i < rating ? 'star empty' : 'star'
+    // return i < r.rating ? 'empty' : 'star'
+  })
+}
 
 const getLocationFromCity = () => {
   cities.value.filter((city) => {
@@ -79,7 +83,7 @@ onMounted(() => {
       <Transition>
         <div class="backdrop" v-show="isOpen"></div>
       </Transition>
-      <form class="sidebar__form">
+      <form class="sidebar__form" :style="{ position: isOpen ? 'relative' : 'sticky' }">
         <div class="sidebar__select" @click="selectIsOpen">
           <div class="sidebar__select sidebar__select--selected-item">
             <span>{{ selectedCity }}</span>
@@ -119,6 +123,17 @@ onMounted(() => {
         >
           <h3>{{ n.name }}</h3>
           <p>{{ n.vicinity }}</p>
+          <div class="rating">
+            <p>{{ n.rating }}</p>
+            <div v-if="n.rating">
+              <span
+                v-for="(r, index) in ratingStarts"
+                :key="index"
+                :class="index + 1 < Math.floor(n.rating) ? 'star' : 'star empty'"
+              ></span>
+            </div>
+            <span v-else>No rating</span>
+          </div>
         </li>
       </ul>
     </aside>
@@ -162,8 +177,8 @@ li {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    // position: sticky;
-    // top: 0;
+    position: sticky;
+    top: 0;
     background: #fff;
     padding: 20px 20px 0px 20px;
     border-bottom: 1px solid #e6e6e6;
@@ -249,6 +264,42 @@ li {
       outline: none;
     }
   }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  background: #fff;
+  padding: 0 2px;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  width: 6px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 100px;
+  border: 2px solid #fff;
+}
+
+.rating {
+  unicode-bidi: bidi-override;
+  direction: rtl;
+  margin-top: 16px;
+  display: flex;
+  flex-flow: row-reverse;
+  p {
+    margin-right: 8px;
+  }
+}
+
+.star {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background-image: url('./assets/filled-star.svg');
+  background-size: cover;
+}
+
+.star.empty {
+  background-image: url('./assets/empty-star.svg');
 }
 
 .arrow-icon {
