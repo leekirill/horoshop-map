@@ -129,7 +129,7 @@ onMounted(() => {
               <span
                 v-for="(r, index) in ratingStarts"
                 :key="index"
-                :class="index + 1 < Math.floor(n.rating) ? 'star' : 'star empty'"
+                :class="index + 1 < Math.ceil(n.rating) ? 'star' : 'star empty'"
               ></span>
             </div>
             <span v-else>No rating</span>
