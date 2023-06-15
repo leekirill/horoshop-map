@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AppLoader from './AppLoader.vue'
 
 const props = defineProps({ arr: Array, isLoading: Boolean })
@@ -26,11 +26,12 @@ const ratingStarts = ref(new Array(5).fill())
         <p>{{ n.rating }}</p>
         <div v-if="n.rating">
           <span
-            v-for="(_, index) in ratingStarts"
+            v-for="(_, index) in ratingStarts.slice().reverse()"
             :key="index"
             :class="index < Math.round(n.rating) ? 'star' : 'star empty'"
-            :id="index"
-          ></span>
+          >
+            {{ index }}</span
+          >
         </div>
         <p v-else>No rating</p>
       </div>
