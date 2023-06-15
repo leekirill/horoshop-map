@@ -5,9 +5,7 @@ import AppLoader from './AppLoader.vue'
 const props = defineProps({ arr: Array, isLoading: Boolean })
 const emit = defineEmits(['handleItem'])
 
-const handleItem = (i) => {
-  emit('handleItem', i)
-}
+const handleItem = (i) => emit('handleItem', i)
 
 const ratingStarts = ref(new Array(5).fill())
 </script>
@@ -30,7 +28,7 @@ const ratingStarts = ref(new Array(5).fill())
           <span
             v-for="(_, index) in ratingStarts"
             :key="index"
-            :class="index + 1 < Math.ceil(n.rating) ? 'star' : 'star empty'"
+            :class="index < Math.round(n.rating) ? 'star' : 'star empty'"
             :id="index"
           ></span>
         </div>
