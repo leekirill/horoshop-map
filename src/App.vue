@@ -109,6 +109,9 @@ li {
 #app {
   position: relative;
   padding: 10px 30px;
+  @media (max-width: 768px) {
+    padding: 10px 10px;
+  }
 }
 .wrapper {
   max-width: 1200px;
@@ -124,6 +127,9 @@ li {
   @media (max-width: 768px) {
     grid-template-rows: 50% 50%;
     grid-template-columns: none;
+    height: 100%;
+
+    transform: translate(0%, 0%);
   }
 
   overflow: hidden;
@@ -236,6 +242,9 @@ li {
     height: 38px;
     padding: 0 20px 0 8px;
     border: 0px solid #fff;
+    @media (max-width: 768px) {
+      font-size: 16px;
+    }
     &:focus {
       outline: none;
     }
